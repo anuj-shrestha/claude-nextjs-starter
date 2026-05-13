@@ -35,7 +35,89 @@ A small, intentional set of pages that exercise every piece of the overlay:
 
 ---
 
-## Try it locally
+## Smart install (recommended)
+
+Don't want to copy everything? Open your project in **Claude Code** and paste this prompt. Claude will read your repo, fetch the starter's files from GitHub, and tell you which pieces fit your stack — then apply only what you approve.
+
+```
+Audit this project to decide which parts of the claude-nextjs-starter setup
+fit. First, read my package.json, tsconfig.json, the contents of src/ or
+app/, and any existing CLAUDE.md / .claude/ / .mcp.json / tooling configs.
+Then fetch the relevant files from
+https://github.com/anuj-shrestha/claude-nextjs-starter (use
+raw.githubusercontent.com for individual files).
+
+For each piece below, give me one of:
+- "Apply as-is" — fits this project unchanged.
+- "Apply with tweak: <what>" — fits but needs an adjustment (different
+  package manager, alternate path alias, missing dep, etc.).
+- "Skip: <why>" — doesn't fit this project.
+
+Pieces to evaluate, grouped:
+
+**Overlay (Claude Code config)** — also shippable standalone from
+https://github.com/anuj-shrestha/claude-nextjs-config:
+- CLAUDE.md
+- Each of the 5 subagents in .claude/agents/
+- Each of the 5 slash commands in .claude/commands/
+- Each of the 3 hooks in .claude/hooks/
+- .claude/settings.json
+- Each of the 4 MCP servers in .mcp.json
+
+**Tooling configs:**
+- .prettierrc + .prettierignore + the prettier-plugin-tailwindcss dep
+- vitest.config.ts + vitest.setup.ts + Vitest/RTL/jsdom deps
+- playwright.config.ts + @playwright/test dep
+- package.json scripts (format, format:check, typecheck, test, test:watch, test:e2e)
+- eslint.config.mjs adjustments (the `.claude/**` ignore)
+
+**shadcn/ui setup:**
+- components.json
+- src/lib/utils.ts (cn helper)
+- src/components/ui/button.tsx, card.tsx, input.tsx
+- If I don't have shadcn yet: recommend running
+  `pnpm dlx shadcn@latest init -d -y` followed by
+  `pnpm dlx shadcn@latest add button card input -y` instead of copying —
+  fresh init pulls current versions and wires Tailwind correctly.
+
+**Demo references** — almost always skip; flag only if I appear new to
+Claude Code and want a working reference on disk:
+- src/app/page.tsx (landing)
+- src/app/components/page.tsx
+- src/app/a11y-broken/page.tsx (intentional WCAG fails for /a11y)
+- src/app/review-bait/page.tsx (intentional code smells for /review)
+- src/app/opengraph-image.tsx
+- src/components/ui/button.test.tsx (reference unit test)
+- tests/e2e/home.spec.ts (reference e2e test)
+
+Factor in: framework version (this repo assumes Next.js 16 App Router),
+package manager, existing tooling I already have (don't reinstall
+prettier/vitest/playwright if they're there — recommend config merges
+instead), router type, whether I use Tailwind/shadcn, and what existing
+CLAUDE.md/agents would conflict.
+
+Output a single recommendation table grouped by section. Don't copy or
+modify any files yet. After I confirm the table, apply only the rows I
+approve, adapting tweaks where I specified them.
+```
+
+**What Claude will do:**
+
+1. Read your project to understand the stack and existing tooling.
+2. Fetch the starter's files from GitHub.
+3. Show a per-piece table: apply / tweak / skip, grouped by overlay /
+   tooling / shadcn / demos.
+4. Wait for your go-ahead, then apply only what you confirmed — including
+   running `shadcn init` or `pnpm add` where that's cleaner than copying.
+
+If you'd rather grab the whole starter and trim later, the manual path
+below is faster.
+
+---
+
+## Try it locally (manual)
+
+If you already know you want the starter, the manual path is:
 
 ```bash
 git clone https://github.com/anuj-shrestha/claude-nextjs-starter.git
