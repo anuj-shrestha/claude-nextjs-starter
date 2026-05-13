@@ -40,12 +40,51 @@ A small, intentional set of pages that exercise every piece of the overlay:
 Don't want to copy everything? Open your project in **Claude Code** and paste this prompt. Claude will read your repo, fetch the starter's files from GitHub, and tell you which pieces fit your stack — then apply only what you approve.
 
 ```
-Audit this project to decide which parts of the claude-nextjs-starter setup
-fit. First, read my package.json, tsconfig.json, the contents of src/ or
-app/, and any existing CLAUDE.md / .claude/ / .mcp.json / tooling configs.
-Then fetch the relevant files from
-https://github.com/anuj-shrestha/claude-nextjs-starter (use
-raw.githubusercontent.com for individual files).
+Help me set up a project from the claude-nextjs-starter
+(https://github.com/anuj-shrestha/claude-nextjs-starter). The flow depends on
+whether this directory already has an existing project.
+
+STEP 1 — Detect the directory state. Run `ls -la` and decide:
+
+- "EMPTY OR NEARLY EMPTY" — no package.json, or only README/LICENSE/.git
+  present. Treat as a fresh start.
+- "EXISTING PROJECT" — package.json present (any framework).
+
+STEP 2A — If EMPTY: clone the starter, then trim it based on what I'm
+actually building. Do this:
+
+  1. Ask me one short question: "What are you building? (1 sentence is fine.)"
+  2. Clone the starter into this directory (preserve any existing .git):
+     `git clone --depth=1 https://github.com/anuj-shrestha/claude-nextjs-starter.git /tmp/cnst-tmp`
+     then copy contents over and discard the temp clone's .git.
+     If there's a local README/LICENSE I want to keep, ask me before
+     overwriting.
+  3. Based on my one-sentence description, decide which pieces are dead
+     weight and propose deleting them in a single table. Defaults:
+     - Always delete demo content unless I said "learning/sandbox":
+       `src/app/a11y-broken/`, `src/app/review-bait/`, `src/app/components/`,
+       `src/app/opengraph-image.tsx`, the reference `tests/e2e/home.spec.ts`,
+       and the reference `src/components/ui/button.test.tsx`.
+     - Reset `src/app/page.tsx` to a minimal placeholder (one h1).
+     - Reset `src/app/layout.tsx` metadata title/description to my project.
+     - Delete `scripts/sync-overlay.sh` — that's for the starter's maintainers.
+     - If my description doesn't involve forms/inputs: drop
+       `src/components/ui/input.tsx` and re-add later via `shadcn add input`.
+     - If my description doesn't involve testing yet: keep configs but
+       delete the example tests.
+  4. Show me the trim table before deleting anything. Wait for my approval.
+  5. After trim: rename the package in package.json, `pnpm install`, run
+     `pnpm typecheck && pnpm build` to verify clean.
+  6. Finally, propose adding ccusage to my per-user
+     ~/.claude/settings.json for token visibility (skip if I already have
+     a statusLine configured) — see "Tips & companions" in the starter README.
+
+STEP 2B — If EXISTING PROJECT: do an audit-and-merge instead. Read my
+package.json, tsconfig.json, the contents of src/ or app/, and any
+existing CLAUDE.md / .claude/ / .mcp.json / tooling configs. Then fetch
+the relevant files from the starter
+(https://github.com/anuj-shrestha/claude-nextjs-starter) via
+raw.githubusercontent.com.
 
 For each piece below, give me one of:
 - "Apply as-is" — fits this project unchanged.
@@ -82,13 +121,15 @@ https://github.com/anuj-shrestha/claude-nextjs-config:
 
 **Demo references** — almost always skip; flag only if I appear new to
 Claude Code and want a working reference on disk:
-- src/app/page.tsx (landing)
-- src/app/components/page.tsx
-- src/app/a11y-broken/page.tsx (intentional WCAG fails for /a11y)
-- src/app/review-bait/page.tsx (intentional code smells for /review)
-- src/app/opengraph-image.tsx
-- src/components/ui/button.test.tsx (reference unit test)
-- tests/e2e/home.spec.ts (reference e2e test)
+- src/app/page.tsx (landing), src/app/components/page.tsx,
+  src/app/a11y-broken/page.tsx, src/app/review-bait/page.tsx,
+  src/app/opengraph-image.tsx, src/components/ui/button.test.tsx,
+  tests/e2e/home.spec.ts
+
+**Companions (optional, per-user):**
+- ccusage statusline for per-turn token visibility (see "Tips & companions"
+  in the starter README). Default to "Skip" if I already have a `statusLine`
+  in ~/.claude/settings.json; otherwise propose adding it there.
 
 Factor in: framework version (this repo assumes Next.js 16 App Router),
 package manager, existing tooling I already have (don't reinstall
@@ -98,17 +139,14 @@ CLAUDE.md/agents would conflict.
 
 Output a single recommendation table grouped by section. Don't copy or
 modify any files yet. After I confirm the table, apply only the rows I
-approve, adapting tweaks where I specified them.
+approve, adapting tweaks where I specified them. Finish with `pnpm
+typecheck` if applicable.
 ```
 
 **What Claude will do:**
 
-1. Read your project to understand the stack and existing tooling.
-2. Fetch the starter's files from GitHub.
-3. Show a per-piece table: apply / tweak / skip, grouped by overlay /
-   tooling / shadcn / demos.
-4. Wait for your go-ahead, then apply only what you confirmed — including
-   running `shadcn init` or `pnpm add` where that's cleaner than copying.
+- **Empty directory:** ask one question, clone the starter, propose a trim table based on what you're building, apply only what you approve, verify with typecheck + build.
+- **Existing project:** read your stack, fetch the starter's files from GitHub, show a per-piece table (apply / tweak / skip) grouped by overlay / tooling / shadcn / demos / companions, wait for confirmation, apply only what you confirmed (running `shadcn init` or `pnpm add` where that's cleaner than copying).
 
 If you'd rather grab the whole starter and trim later, the manual path
 below is faster.
@@ -202,6 +240,25 @@ git commit -am "sync overlay @ <commit-sha>"
 ```
 
 The script copies `CLAUDE.md`, `.claude/`, and `.mcp.json` from a local checkout of the config repo, preserves the **Project Context** section of `CLAUDE.md`, and refuses to run if there are uncommitted changes in those paths (so you don't lose local edits by accident).
+
+---
+
+## Tips & companions
+
+### See your token spend per session
+
+Claude Code's `/cost` gives session totals. For richer per-turn visibility — burn rate, current 5-hour block, context %, today's cost — add this to **your** `~/.claude/settings.json` (per-user, not part of this repo):
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "npx -y ccusage statusline"
+  }
+}
+```
+
+[`ccusage`](https://github.com/ryoppippi/ccusage) is MIT, local-only (no telemetry), and reads `~/.claude/projects/*.jsonl` to compute usage. Requires Node ≥20 or Bun ≥1.2. For faster refresh, swap `npx -y` for `bunx`.
 
 ---
 
