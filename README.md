@@ -41,16 +41,51 @@ Don't want to copy everything? Open your project in **Claude Code** and paste th
 
 ```
 Help me set up a project from the claude-nextjs-starter
-(https://github.com/anuj-shrestha/claude-nextjs-starter). The flow depends on
-whether this directory already has an existing project.
+(https://github.com/anuj-shrestha/claude-nextjs-starter). The flow has three
+steps. Do them in order. Do not skip STEP 1.
 
-STEP 1 — Detect the directory state. Run `ls -la` and decide:
+STEP 1 — Pre-flight: turn on per-turn token visibility BEFORE we install
+anything. This way I can see exactly what this install costs in the
+statusline as you work.
+
+  1. Read ~/.claude/settings.json (create the file as `{}` if missing —
+     do not touch any existing keys).
+  2. Check for `"_ccusageDeclined": true` at the top level. If present,
+     skip the rest of STEP 1 silently and go to STEP 2 — I've already
+     opted out in a prior session.
+  3. If a `statusLine` block already exists, print it to me and ask whether
+     I want to swap it for the ccusage version below. Wait for my answer.
+  4. If no `statusLine` exists, tell me about ccusage in two sentences
+     (MIT, local-only, no telemetry; reads ~/.claude/projects/*.jsonl to
+     show per-turn cost, burn rate, and context %) and propose adding
+     exactly this block to ~/.claude/settings.json (merging — never
+     overwriting other keys):
+
+         "statusLine": {
+           "type": "command",
+           "command": "npx -y ccusage statusline"
+         }
+
+  5. Wait for my yes/no.
+     - On YES: edit ~/.claude/settings.json to add the `statusLine` block
+       (preserve all other keys with strict JSON formatting). Tell me to
+       refresh Claude Code's statusline once.
+     - On NO: edit ~/.claude/settings.json to add `"_ccusageDeclined": true`
+       so this step skips silently in future installs. Proceed without
+       ccusage.
+  6. Mention that swapping `npx -y` for `bunx` is faster if I have Bun.
+
+This step is the only way I'll find out ccusage exists. Do not skip it
+because the install feels like the real work — for me, seeing the cost
+land in real time IS the install.
+
+STEP 2 — Detect the directory state. Run `ls -la` and decide:
 
 - "EMPTY OR NEARLY EMPTY" — no package.json, or only README/LICENSE/.git
   present. Treat as a fresh start.
 - "EXISTING PROJECT" — package.json present (any framework).
 
-STEP 2A — If EMPTY: clone the starter, then trim it based on what I'm
+STEP 3A — If EMPTY: clone the starter, then trim it based on what I'm
 actually building. Do this:
 
   1. Ask me one short question: "What are you building? (1 sentence is fine.)"
@@ -76,7 +111,7 @@ actually building. Do this:
   5. After trim: rename the package in package.json, `pnpm install`, run
      `pnpm typecheck && pnpm build` to verify clean.
 
-STEP 2B — If EXISTING PROJECT: do an audit-and-merge instead. Read my
+STEP 3B — If EXISTING PROJECT: do an audit-and-merge instead. Read my
 package.json, tsconfig.json, the contents of src/ or app/, and any
 existing CLAUDE.md / .claude/ / .mcp.json / tooling configs. Then fetch
 the relevant files from the starter
@@ -134,40 +169,13 @@ Output a single recommendation table grouped by section. Don't copy or
 modify any files yet. After I confirm the table, apply only the rows I
 approve, adapting tweaks where I specified them. Finish with `pnpm
 typecheck` if applicable.
-
-STEP 3 — ALWAYS run this step, regardless of which branch above ran. Do
-not skip it. Per-turn token visibility setup:
-
-  1. Read ~/.claude/settings.json (create the file as `{}` if missing —
-     do not touch any existing keys).
-  2. If a `statusLine` block already exists there, print it to me and ask
-     whether I want to swap it for the ccusage version below. Stop and
-     wait for my answer before changing anything.
-  3. If no `statusLine` exists, tell me about ccusage in two sentences
-     (MIT, local-only, no telemetry; reads ~/.claude/projects/*.jsonl to
-     show per-turn cost, burn rate, and context %) and propose adding
-     exactly this block to ~/.claude/settings.json (merging — never
-     overwriting other keys):
-
-         "statusLine": {
-           "type": "command",
-           "command": "npx -y ccusage statusline"
-         }
-
-  4. Wait for my yes/no. On yes, edit ~/.claude/settings.json (preserve
-     all other keys with strict JSON formatting). On no, do nothing —
-     don't ask again.
-  5. Mention that swapping `npx -y` for `bunx` is faster if I have Bun
-     installed.
-
-This step is the only way I'll find out ccusage exists. Don't let it slip
-because the install above felt complete — I want the explicit offer.
 ```
 
 **What Claude will do:**
 
-- **Empty directory:** ask one question, clone the starter, propose a trim table based on what you're building, apply only what you approve, verify with typecheck + build, then propose ccusage statusline.
-- **Existing project:** read your stack, fetch the starter's files from GitHub, show a per-piece table (apply / tweak / skip) grouped by overlay / tooling / shadcn / demos, wait for confirmation, apply only what you confirmed (running `shadcn init` or `pnpm add` where that's cleaner than copying), then propose ccusage statusline.
+1. **Pre-flight:** propose ccusage statusline for per-turn token visibility so you can watch the install's cost land in real time.
+2. **Empty directory:** ask one question, clone the starter, propose a trim table based on what you're building, apply only what you approve, verify with typecheck + build.
+3. **Existing project:** read your stack, fetch the starter's files from GitHub, show a per-piece table (apply / tweak / skip) grouped by overlay / tooling / shadcn / demos, wait for confirmation, apply only what you confirmed (running `shadcn init` or `pnpm add` where that's cleaner than copying).
 
 If you'd rather grab the whole starter and trim later, the manual path
 below is faster.
