@@ -28,7 +28,7 @@ If you fork this starter, you'll always want to pull overlay updates from the so
 A small, intentional set of pages that exercise every piece of the overlay:
 
 - **Landing page (`/`)** — explains the project and links to the config repo.
-- **`/components` page** — shows the shadcn primitives (Button, Card, Input) installed during scaffold. Use `/new-component <Name>` to add more.
+- **`/components` page** — shows the shadcn primitives (Button, Card, Input) installed during scaffold. Use `/new-component <Name>` to add more, or run `/design-review src/app/components/page.tsx` to see the `designer` agent evaluate visual quality.
 - **`/a11y-broken` page** — five intentional WCAG 2.1 AA failures: `<div onClick>` button, image without `alt`, input without label, low-contrast text, color-only "required" indicator. Run `/a11y src/app/a11y-broken/page.tsx` in Claude Code to see the auditor find them. The fix lives in a follow-up commit — `git log src/app/a11y-broken/` to find it.
 - **`/review-bait` page** — five intentional code-quality issues: hardcoded URL, magic numbers, an overgrown function, unhandled `fetch`, implicit `any` data shape. Run `/review src/app/review-bait/page.tsx` to see them flagged. Same follow-up-commit pattern.
 - **`src/components/ui/button.test.tsx`** — a Vitest unit test demonstrating the test setup. Add tests for new components with `/write-test`.
@@ -75,9 +75,6 @@ actually building. Do this:
   4. Show me the trim table before deleting anything. Wait for my approval.
   5. After trim: rename the package in package.json, `pnpm install`, run
      `pnpm typecheck && pnpm build` to verify clean.
-  6. Finally, propose adding ccusage to my per-user
-     ~/.claude/settings.json for token visibility (skip if I already have
-     a statusLine configured) — see "Tips & companions" in the starter README.
 
 STEP 2B — If EXISTING PROJECT: do an audit-and-merge instead. Read my
 package.json, tsconfig.json, the contents of src/ or app/, and any
@@ -96,9 +93,10 @@ Pieces to evaluate, grouped:
 
 **Overlay (Claude Code config)** — also shippable standalone from
 https://github.com/anuj-shrestha/claude-nextjs-config:
-- CLAUDE.md
-- Each of the 5 subagents in .claude/agents/
-- Each of the 5 slash commands in .claude/commands/
+- CLAUDE.md (including the Design Discipline section)
+- Each of the 6 subagents in .claude/agents/
+- Each of the 6 slash commands in .claude/commands/
+- The `design-discipline` skill in .claude/skills/
 - Each of the 3 hooks in .claude/hooks/
 - .claude/settings.json
 - Each of the 4 MCP servers in .mcp.json
@@ -126,11 +124,6 @@ Claude Code and want a working reference on disk:
   src/app/opengraph-image.tsx, src/components/ui/button.test.tsx,
   tests/e2e/home.spec.ts
 
-**Companions (optional, per-user):**
-- ccusage statusline for per-turn token visibility (see "Tips & companions"
-  in the starter README). Default to "Skip" if I already have a `statusLine`
-  in ~/.claude/settings.json; otherwise propose adding it there.
-
 Factor in: framework version (this repo assumes Next.js 16 App Router),
 package manager, existing tooling I already have (don't reinstall
 prettier/vitest/playwright if they're there — recommend config merges
@@ -141,12 +134,40 @@ Output a single recommendation table grouped by section. Don't copy or
 modify any files yet. After I confirm the table, apply only the rows I
 approve, adapting tweaks where I specified them. Finish with `pnpm
 typecheck` if applicable.
+
+STEP 3 — ALWAYS run this step, regardless of which branch above ran. Do
+not skip it. Per-turn token visibility setup:
+
+  1. Read ~/.claude/settings.json (create the file as `{}` if missing —
+     do not touch any existing keys).
+  2. If a `statusLine` block already exists there, print it to me and ask
+     whether I want to swap it for the ccusage version below. Stop and
+     wait for my answer before changing anything.
+  3. If no `statusLine` exists, tell me about ccusage in two sentences
+     (MIT, local-only, no telemetry; reads ~/.claude/projects/*.jsonl to
+     show per-turn cost, burn rate, and context %) and propose adding
+     exactly this block to ~/.claude/settings.json (merging — never
+     overwriting other keys):
+
+         "statusLine": {
+           "type": "command",
+           "command": "npx -y ccusage statusline"
+         }
+
+  4. Wait for my yes/no. On yes, edit ~/.claude/settings.json (preserve
+     all other keys with strict JSON formatting). On no, do nothing —
+     don't ask again.
+  5. Mention that swapping `npx -y` for `bunx` is faster if I have Bun
+     installed.
+
+This step is the only way I'll find out ccusage exists. Don't let it slip
+because the install above felt complete — I want the explicit offer.
 ```
 
 **What Claude will do:**
 
-- **Empty directory:** ask one question, clone the starter, propose a trim table based on what you're building, apply only what you approve, verify with typecheck + build.
-- **Existing project:** read your stack, fetch the starter's files from GitHub, show a per-piece table (apply / tweak / skip) grouped by overlay / tooling / shadcn / demos / companions, wait for confirmation, apply only what you confirmed (running `shadcn init` or `pnpm add` where that's cleaner than copying).
+- **Empty directory:** ask one question, clone the starter, propose a trim table based on what you're building, apply only what you approve, verify with typecheck + build, then propose ccusage statusline.
+- **Existing project:** read your stack, fetch the starter's files from GitHub, show a per-piece table (apply / tweak / skip) grouped by overlay / tooling / shadcn / demos, wait for confirmation, apply only what you confirmed (running `shadcn init` or `pnpm add` where that's cleaner than copying), then propose ccusage statusline.
 
 If you'd rather grab the whole starter and trim later, the manual path
 below is faster.
@@ -167,11 +188,12 @@ pnpm dev
 Then open the repo in **Claude Code** and try:
 
 ```
-/agents              # five agents should be listed
+/agents              # six agents should be listed
 /                    # five custom commands appear in the menu
 /mcp                 # MCP servers should connect
 /a11y src/app/a11y-broken/page.tsx
 /review src/app/review-bait/page.tsx
+/design-review src/app/components/page.tsx
 /new-component Card
 ```
 

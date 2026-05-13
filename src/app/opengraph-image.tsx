@@ -52,9 +52,11 @@ export default function OpenGraphImage() {
             color: '#d4d4d8',
           }}
         >
-          <div>5 agents</div>
+          <div>6 agents</div>
           <div>·</div>
-          <div>5 commands</div>
+          <div>6 commands</div>
+          <div>·</div>
+          <div>1 skill</div>
           <div>·</div>
           <div>3 hooks</div>
           <div>·</div>

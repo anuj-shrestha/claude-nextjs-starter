@@ -27,16 +27,22 @@ export default function Home() {
         <h2 className="mb-4 text-xl font-semibold">What&apos;s wired up</h2>
         <dl className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-lg border border-zinc-200 p-4">
-            <dt className="text-sm font-semibold text-zinc-900">5 subagents</dt>
+            <dt className="text-sm font-semibold text-zinc-900">6 subagents</dt>
             <dd className="mt-1 text-sm text-zinc-600">
-              code-reviewer, test-writer, a11y-auditor, next-debugger, refactorer. Auto-routed by
-              prompt.
+              code-reviewer, test-writer, a11y-auditor, designer, next-debugger, refactorer.
+              Auto-routed by prompt.
             </dd>
           </div>
           <div className="rounded-lg border border-zinc-200 p-4">
-            <dt className="text-sm font-semibold text-zinc-900">5 slash commands</dt>
+            <dt className="text-sm font-semibold text-zinc-900">6 slash commands</dt>
             <dd className="mt-1 text-sm text-zinc-600">
-              /new-component, /new-route, /write-test, /review, /a11y.
+              /new-component, /new-route, /write-test, /review, /a11y, /design-review.
+            </dd>
+          </div>
+          <div className="rounded-lg border border-zinc-200 p-4">
+            <dt className="text-sm font-semibold text-zinc-900">1 skill</dt>
+            <dd className="mt-1 text-sm text-zinc-600">
+              design-discipline auto-activates on UI/component work.
             </dd>
           </div>
           <div className="rounded-lg border border-zinc-200 p-4">
