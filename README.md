@@ -7,6 +7,13 @@
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fanuj-shrestha%2Fclaude-nextjs-starter&project-name=claude-nextjs-starter&repository-name=claude-nextjs-starter)
 
 ---
+Before:
+<img width="2430" height="1542" alt="image" src="https://github.com/user-attachments/assets/d788a01d-eab8-4256-a046-ee23edd32b4b" />
+
+After:
+<img width="720" height="434" alt="image" src="https://github.com/user-attachments/assets/e02de77e-c2a8-4cda-aed5-6af18ea4f360" />
+
+---
 
 ## What this is
 
